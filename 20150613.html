@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://yuxihan.com').hostname,
+    root: '/',
+    scheme: 'Mist',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="在android系统中sendBroadcast和BroadcastReceiver。只要BroadcastReceiver指定的action和sendBroadcast action一致就可以就行消息接收。但是我们有这样的需求即我发送的广播不允许所有应用都可以接收广播消息，而是要经过发送者允许的才可以。比如某一个产品簇，每一个产品发送的广播消息只允许本簇内的产品才允许接收消息。其它应用即使act">
+<meta name="keywords" content="广播安全">
+<meta property="og:type" content="article">
+<meta property="og:title" content="android 限制广播消息的接收者">
+<meta property="og:url" content="https:&#x2F;&#x2F;yuxihan.com&#x2F;20150613.html">
+<meta property="og:site_name" content="Write the code">
+<meta property="og:description" content="在android系统中sendBroadcast和BroadcastReceiver。只要BroadcastReceiver指定的action和sendBroadcast action一致就可以就行消息接收。但是我们有这样的需求即我发送的广播不允许所有应用都可以接收广播消息，而是要经过发送者允许的才可以。比如某一个产品簇，每一个产品发送的广播消息只允许本簇内的产品才允许接收消息。其它应用即使act">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2015-06-13T06:31:42.000Z">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://yuxihan.com/20150613.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>android 限制广播消息的接收者 | Write the code</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?e8fc3c7012308a4ca7e8bd1a27c6ce86";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Write the code</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://yuxihan.com/20150613.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/default_avatar.jpg">
+      <meta itemprop="name" content="mContext">
+      <meta itemprop="description" content="Enlightened Shenzhen">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Write the code">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          android 限制广播消息的接收者
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2015-06-13 14:31:42" itemprop="dateCreated datePublished" datetime="2015-06-13T14:31:42+08:00">2015-06-13</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在android系统中sendBroadcast和BroadcastReceiver。只要BroadcastReceiver指定的action和sendBroadcast action一致就可以就行消息接收。但是我们有这样的需求即我发送的广播不允许所有应用都可以接收广播消息，而是要经过发送者允许的才可以。比如某一个产品簇，每一个产品发送的广播消息只允许本簇内的产品才允许接收消息。其它应用即使action一样，也无法接收消息。这样就大大的提供了产品的安全性。那么如何实现呢？本文主要目的就是于此。</p>
+<a id="more"></a>
+
+<h2 id="一、只允许本应用内允许接收"><a href="#一、只允许本应用内允许接收" class="headerlink" title="一、只允许本应用内允许接收"></a>一、只允许本应用内允许接收</h2><h3 id="解决方案一：LocalBroadcastManager-（局部广播）"><a href="#解决方案一：LocalBroadcastManager-（局部广播）" class="headerlink" title="解决方案一：LocalBroadcastManager （局部广播）"></a>解决方案一：LocalBroadcastManager （局部广播）</h3><p><strong>优点：</strong></p>
+<ol>
+<li><p>因广播数据在本应用范围内传播，你不用担心隐私数据泄露的问题。</p>
+</li>
+<li><p>不用担心别的应用伪造广播，造成安全隐患。</p>
+</li>
+<li><p>相比在系统内发送全局广播，它更高效。</p>
+</li>
+</ol>
+<p><strong>缺点：</strong></p>
+<ol>
+<li><p>它只能够在同一个进程使用，如果本应用是多进程的。必须保证发送者和接收者是在同一个进程内。</p>
+</li>
+<li><p>它只能够动态注册和取消。</p>
+</li>
+</ol>
+<h4 id="使用实例"><a href="#使用实例" class="headerlink" title="使用实例"></a>使用实例</h4><p>先通过LocalBroadcastManager获取实例</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(<span class="keyword">this</span>);</span></pre></td></tr></table></figure>
+
+<p>然后通过函数 registerReceiver来注册监听器</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">registerReceiver(newBroadcastReceiver() &#123;  </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"> <span class="meta">@Override</span>  </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onReceive</span><span class="params">(Context context, Intent intent)</span> </span>&#123;  </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"> <span class="comment">// TODO Handle the received local broadcast</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">  &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">  </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">&#125;, newIntentFilter(XXXX));</span></pre></td></tr></table></figure>
+
+<p>通过 sendBroadcast 函数来发送广播</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">lbm.sendBroadcast(newIntent(XXXX));</span></pre></td></tr></table></figure>
+
+<h3 id="解决方案二：intent-指定包名Intent-setPackage设置广播仅对本程序有效【见二】"><a href="#解决方案二：intent-指定包名Intent-setPackage设置广播仅对本程序有效【见二】" class="headerlink" title="解决方案二：intent 指定包名Intent.setPackage设置广播仅对本程序有效【见二】"></a>解决方案二：intent 指定包名Intent.setPackage设置广播仅对本程序有效【见二】</h3><h2 id="二、指定某一个应用允许接收"><a href="#二、指定某一个应用允许接收" class="headerlink" title="二、指定某一个应用允许接收"></a>二、指定某一个应用允许接收</h2><h3 id="解决方案：intent-指定包名Intent-setPackage设置广播仅对相同包名的有效"><a href="#解决方案：intent-指定包名Intent-setPackage设置广播仅对相同包名的有效" class="headerlink" title="解决方案：intent 指定包名Intent.setPackage设置广播仅对相同包名的有效"></a>解决方案：intent 指定包名Intent.setPackage设置广播仅对相同包名的有效</h3><p><strong>优点：</strong></p>
+<ol>
+<li><p>支持跨进程</p>
+</li>
+<li><p>receiver可以是静态注册也可以是动态注册。</p>
+</li>
+<li><p>只有指定的包名的应用程序才能够接收到数据，所以安全性较高。</p>
+</li>
+</ol>
+<p><strong>缺点：</strong></p>
+<ol>
+<li><p>如果一旦反编译，很容易伪造广播，造成安全隐患</p>
+</li>
+<li><p>在系统内发生全局广播，它效率较低</p>
+</li>
+<li><p>它只能够满足一个应用的需求，不能够同时指定多个</p>
+</li>
+</ol>
+<h4 id="使用实例-1"><a href="#使用实例-1" class="headerlink" title="使用实例_"></a>使用实例_</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">Intent intent = <span class="keyword">new</span> Intent();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">intent.setPackage(<span class="string">"应用包名"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">intent.setAction(<span class="string">"消息action"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">sendBroadcast(intent);</span></pre></td></tr></table></figure>
+
+<h2 id="三、指定某一个receiver允许接收"><a href="#三、指定某一个receiver允许接收" class="headerlink" title="三、指定某一个receiver允许接收"></a>三、指定某一个receiver允许接收</h2><h3 id="解决方案：intent-指定包名Intent-setComponent设置广播仅对相同包名的有效"><a href="#解决方案：intent-指定包名Intent-setComponent设置广播仅对相同包名的有效" class="headerlink" title="解决方案：intent 指定包名Intent. setComponent设置广播仅对相同包名的有效"></a>解决方案：intent 指定包名Intent. setComponent设置广播仅对相同包名的有效</h3><p><strong>优点：</strong></p>
+<ol>
+<li><p>可以指定到具体某一个receiver，安全性更高</p>
+</li>
+<li><p>receiver可以是静态注册也可以是动态注册。</p>
+</li>
+</ol>
+<p><strong>缺点：</strong></p>
+<ol>
+<li>它只能指定一个receiver，局限性较大</li>
+</ol>
+<p>使用实例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">Intent intent = <span class="keyword">new</span> Intent();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">intent. setComponent(newComponentName(<span class="string">"包名"</span>, <span class="string">"Receiver类名"</span>));</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">intent.setAction(<span class="string">"消息action"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">sendBroadcast(intent);</span></pre></td></tr></table></figure>
+
+<h2 id="四、指定多个应用有权接收"><a href="#四、指定多个应用有权接收" class="headerlink" title="四、指定多个应用有权接收"></a>四、指定多个应用有权接收</h2><h3 id="解决方案：sendBroadcast-Intent-String-的接口在发送广播时指定接收者必须具备的permission"><a href="#解决方案：sendBroadcast-Intent-String-的接口在发送广播时指定接收者必须具备的permission" class="headerlink" title="解决方案：sendBroadcast(Intent, String)的接口在发送广播时指定接收者必须具备的permission"></a>解决方案：sendBroadcast(Intent, String)的接口在发送广播时指定接收者必须具备的permission</h3><p>如果担心反编译后，权限被窃取，限制失效。可以在声明权限时，提高权限的leverl为签名验证，即只有相同签名的应用且有该权限才能够接收，这样就能够满足产品簇的问题。</p>
+<p>使用实例：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">AndroidManifest.xml</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"> <span class="tag">&lt;<span class="name">permission</span> <span class="attr">android:description</span>=<span class="string">"@string/XXX"</span>  </span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"><span class="tag"></span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line"><span class="tag">        <span class="attr">android:label</span>=<span class="string">"XXXX"</span>  </span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"><span class="tag"></span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line"><span class="tag">         <span class="attr">android:name</span>=<span class="string">" com.test.permission"</span>  </span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line"><span class="tag"></span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line"><span class="tag">         <span class="attr">android:protectionLevel</span>=<span class="string">" signature"</span>&gt;</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line"> <span class="tag">&lt;<span class="name">receiver</span></span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line"><span class="tag"></span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line"><span class="tag">            <span class="attr">android:name</span>=<span class="string">"XXXX"</span></span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line"><span class="tag"></span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line"><span class="tag">            <span class="attr">android:permission</span>=<span class="string">"com.test.permission"</span> &gt;</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">            <span class="tag">&lt;<span class="name">intent-filter</span> &gt;</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">                 <span class="tag">&lt;<span class="name">actionandroid:name="XXXXX"</span> /&gt;</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">            <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line"> <span class="tag">&lt;/<span class="name">receiver</span>&gt;</span></span></pre></td></tr></table></figure>
+
+<p>Java:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">Intent intent = <span class="keyword">new</span> Intent();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">intent.setAction(<span class="string">"消息action"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">sendBroadcast(intent, <span class="string">"com.test.permission"</span>);</span></pre></td></tr></table></figure>
+
+<p>注意：如果要求安全级别较高，使用签名验证机制即使优点又是缺点。目前还没有找到更好的方法，能够满足多个指定应用都能够接收消息，且安全级别不会受到伪造或窃取的风险。</p>
+<p>原文:<a href="http://blog.csdn.net/mingli198611/article/details/17762149" target="_blank" rel="noopener" title="CSDN_小M的专栏">http://blog.csdn.net/mingli198611/article/details/17762149</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%B9%BF%E6%92%AD%E5%AE%89%E5%85%A8/" rel="tag"># 广播安全</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20140520.html" rel="prev" title="Hello World">
+      <i class="fa fa-chevron-left"></i> Hello World
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20160816.html" rel="next" title="ViewHolder的超简洁写法">
+      ViewHolder的超简洁写法 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、只允许本应用内允许接收"><span class="nav-number">1.</span> <span class="nav-text">一、只允许本应用内允许接收</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#解决方案一：LocalBroadcastManager-（局部广播）"><span class="nav-number">1.1.</span> <span class="nav-text">解决方案一：LocalBroadcastManager （局部广播）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#使用实例"><span class="nav-number">1.1.1.</span> <span class="nav-text">使用实例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解决方案二：intent-指定包名Intent-setPackage设置广播仅对本程序有效【见二】"><span class="nav-number">1.2.</span> <span class="nav-text">解决方案二：intent 指定包名Intent.setPackage设置广播仅对本程序有效【见二】</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、指定某一个应用允许接收"><span class="nav-number">2.</span> <span class="nav-text">二、指定某一个应用允许接收</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#解决方案：intent-指定包名Intent-setPackage设置广播仅对相同包名的有效"><span class="nav-number">2.1.</span> <span class="nav-text">解决方案：intent 指定包名Intent.setPackage设置广播仅对相同包名的有效</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#使用实例-1"><span class="nav-number">2.1.1.</span> <span class="nav-text">使用实例_</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、指定某一个receiver允许接收"><span class="nav-number">3.</span> <span class="nav-text">三、指定某一个receiver允许接收</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#解决方案：intent-指定包名Intent-setComponent设置广播仅对相同包名的有效"><span class="nav-number">3.1.</span> <span class="nav-text">解决方案：intent 指定包名Intent. setComponent设置广播仅对相同包名的有效</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、指定多个应用有权接收"><span class="nav-number">4.</span> <span class="nav-text">四、指定多个应用有权接收</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#解决方案：sendBroadcast-Intent-String-的接口在发送广播时指定接收者必须具备的permission"><span class="nav-number">4.1.</span> <span class="nav-text">解决方案：sendBroadcast(Intent, String)的接口在发送广播时指定接收者必须具备的permission</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="mContext"
+      src="/images/default_avatar.jpg">
+  <p class="site-author-name" itemprop="name">mContext</p>
+  <div class="site-description" itemprop="description">Enlightened Shenzhen</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">23</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/mContext" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;mContext" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:h@yuxihan.com" title="E-Mail → mailto:h@yuxihan.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <!--
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备19060123号 </a><a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=44030702002723" rel="noopener" target="_blank">粤公网安备 44030702002723号 </a>
+  </div>
+-->
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <!-- <i class="fa fa-user"></i> -->
+	<i class="fa fa-heart"></i>
+  </span>  
+  <span class="author" itemprop="copyrightHolder">mContext</span>
+  <span>
+	<a target="_blank" href="https://www.upyun.com/?utm_source=lianmeng&utm_medium=referral">
+	<img src="https://upyun.yuxihan.com/yunpaiyun.png" style="display:inline-block;text-decoration:none;width: 50px;margin-bottom:-8px;"></a>
+  </span>
+</div>
+
+<!-- 在网页底部添加网站运行时间 -->
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("05/20/2014 00:00:00");//此处修改你的建站时间或者网站上线时间
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "网站已运行 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+    }
+setInterval("createtime()",250);
+</script>
+  <div class="beian">
+    <a href="http://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备19060123号</a>
+
+    <span class="post-meta-divider">|</span>
+  
+    <img src="/images/beian_icon.png" style="display:inline-block;text-decoration:none;height:13px;" />
+   
+    <a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=44030702002723" rel="noopener" target="_blank">粤公网安备 44030702002723号</a>
+
+  </div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

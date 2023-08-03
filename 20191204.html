@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://yuxihan.com').hostname,
+    root: '/',
+    scheme: 'Mist',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="Windows 10 企业版 LTSC安装 WSL开始——&amp;gt;设置–&amp;gt;搜索”启用或关闭 Windows 功能“,点击弹出”Windows 功能“对话框.">
+<meta name="keywords" content="Windows10,WSL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Windows 10 WSL 的安装和使用">
+<meta property="og:url" content="https:&#x2F;&#x2F;yuxihan.com&#x2F;20191204.html">
+<meta property="og:site_name" content="Write the code">
+<meta property="og:description" content="Windows 10 企业版 LTSC安装 WSL开始——&amp;gt;设置–&amp;gt;搜索”启用或关闭 Windows 功能“,点击弹出”Windows 功能“对话框.">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-12-04T06:31:42.000Z">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://yuxihan.com/20191204.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Windows 10 WSL 的安装和使用 | Write the code</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?e8fc3c7012308a4ca7e8bd1a27c6ce86";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Write the code</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://yuxihan.com/20191204.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/default_avatar.jpg">
+      <meta itemprop="name" content="mContext">
+      <meta itemprop="description" content="Enlightened Shenzhen">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Write the code">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Windows 10 WSL 的安装和使用
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-12-04 14:31:42" itemprop="dateCreated datePublished" datetime="2019-12-04T14:31:42+08:00">2019-12-04</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Windows-10-企业版-LTSC安装-WSL"><a href="#Windows-10-企业版-LTSC安装-WSL" class="headerlink" title="Windows 10 企业版 LTSC安装 WSL"></a>Windows 10 企业版 LTSC安装 WSL</h1><p><strong>开始</strong>——&gt;<strong>设置</strong>–&gt;搜索”<strong>启用或关闭 Windows 功能</strong>“,点击弹出”<strong>Windows 功能</strong>“对话框.</p>
+<a id="more"></a>
+<p>在弹出”<strong>Windows 功能</strong>“对话框中，找到”<strong>Windows Subsystem for linux</strong>“/“<strong>适用于Linux的Windows子系统</strong>“条目，点击选中其前面的复选框。<br>点击确定等待下载安装完成后重启.</p>
+<h1 id="手动下载适用于Linux的Windows子系统发行版安装包"><a href="#手动下载适用于Linux的Windows子系统发行版安装包" class="headerlink" title="手动下载适用于Linux的Windows子系统发行版安装包"></a>手动下载适用于Linux的Windows子系统发行版安装包</h1><p>如果 Microsoft Store 应用不可用，则可以通过单击以下链接下载并手动安装 Linux 发行版：</p>
+<pre><code>官网链接: https://aka.ms/wsl-ubuntu-1804
+百度网盘链接: https://pan.baidu.com/s/1p5ZzYTeQTko-V4_dwYl_Rw 提取码: uf8k</code></pre><h1 id="安装发行版"><a href="#安装发行版" class="headerlink" title="安装发行版"></a>安装发行版</h1><h2 id="解压后直接安装-推荐"><a href="#解压后直接安装-推荐" class="headerlink" title="解压后直接安装(推荐)"></a>解压后直接安装(推荐)</h2><p>将下载的appx文件后缀名改为zip后解压到”D:\WSLUbuntu”,<br>在目录中的exe文件上右键<strong>以管理员身份运行</strong></p>
+<h2 id="命令安装"><a href="#命令安装" class="headerlink" title="命令安装"></a>命令安装</h2><p>使用 PowerShell 安装发行版。 只需导航到包含上面下载的发行版的文件夹，并在该目录中运行以下命令，其中 app_name 是发行版文件的名称。</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">Add-AppxPackage .\app_name.appx</span></pre></td></tr></table></figure>
+<h1 id="初始化发行版"><a href="#初始化发行版" class="headerlink" title="初始化发行版"></a>初始化发行版</h1><p>首次运行新安装的分发版时，会打开一个控制台窗口，其中指出需要等待一两分钟时间来完成安装。<br>安装完成后，系统会提示创建新的用户帐户（及其密码）。</p>
+<h1 id="设置root密码"><a href="#设置root密码" class="headerlink" title="设置root密码"></a>设置root密码</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">sudo passwd root</span></pre></td></tr></table></figure>
+<h1 id="默认使用root用户登录"><a href="#默认使用root用户登录" class="headerlink" title="默认使用root用户登录"></a>默认使用root用户登录</h1><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="function">D:\<span class="title">WSLUbuntu</span>\<span class="title">ubuntu1804.exe</span> <span class="title">config</span> --<span class="title">default</span>-<span class="title">user</span> <span class="title">root</span></span></span></pre></td></tr></table></figure>
+<h1 id="Windows-10-子系统Linux重启-不重启Win10"><a href="#Windows-10-子系统Linux重启-不重启Win10" class="headerlink" title="Windows 10 子系统Linux重启(不重启Win10)"></a>Windows 10 子系统Linux重启(不重启Win10)</h1><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="built_in">net</span> stop LxssManager</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="built_in">net</span> <span class="built_in">start</span> LxssManager</span></pre></td></tr></table></figure>
+<h1 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h1><p>启动的时候,在命令行中输入bash就可以启动.<br>另外存放在linux系统,点击exe也可以启动.两种方式启动的默认路径不一样.<br>如果安装了多个发行版,默认启动的发行版可以指定.指定方式为<br>使用<strong>wslconfig /l</strong>查看所有的发行版.<br>使用<strong>wlsconfig /s 发行版名</strong>,指定默认发行版.</p>
+<h1 id="win10内置Ubuntu-Linux换阿里源"><a href="#win10内置Ubuntu-Linux换阿里源" class="headerlink" title="win10内置Ubuntu/Linux换阿里源"></a>win10内置Ubuntu/Linux换阿里源</h1><h2 id="先用lsb-release-a查看自己的Ubuntu-Linux系统的版本"><a href="#先用lsb-release-a查看自己的Ubuntu-Linux系统的版本" class="headerlink" title="先用lsb_release -a查看自己的Ubuntu/Linux系统的版本"></a>先用<strong>lsb_release -a</strong>查看自己的Ubuntu/Linux系统的版本</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">ray@mContext:~/blog$ lsb_release -a</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">No LSB modules are available.</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">Distributor ID: Ubuntu</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">Description:    Ubuntu 18.04.3 LTS</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">Release:        18.04</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">Codename:       bionic</span></pre></td></tr></table></figure>
+<h2 id="备份内置源"><a href="#备份内置源" class="headerlink" title="备份内置源"></a>备份内置源</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">cp /etc/apt/sources.list /etc/apt/sources.list.bak</span></pre></td></tr></table></figure>
+<h2 id="替换阿里源"><a href="#替换阿里源" class="headerlink" title="替换阿里源"></a>替换阿里源</h2><p>参考:<a href="https://developer.aliyun.com/mirror" target="_blank" rel="noopener">https://developer.aliyun.com/mirror</a><br>用你熟悉的编辑器打开：<strong>/etc/apt/sources.list</strong><br>替换默认的<strong>archive.ubuntu.com</strong>为<strong>mirrors.aliyun.com</strong></p>
+<p>例如:Vim编辑器</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">sudo vi /etc/apt/sources.list</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">:% s/archive\.ubuntu\.com/mirrors.aliyun.com/g</span></pre></td></tr></table></figure>
+<h1 id="更新和升级分发版的包"><a href="#更新和升级分发版的包" class="headerlink" title="更新和升级分发版的包"></a>更新和升级分发版的包</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">sudo apt update &amp;&amp; sudo apt upgrade</span></pre></td></tr></table></figure>
+<h1 id="卸载"><a href="#卸载" class="headerlink" title="卸载"></a>卸载</h1><p>在Win10 LTSC 2019之前,卸载可以用lxrun工具,但是LTSC 2019抛弃了这个工具.因此你可以在别的地方看到很多说重装linux子系统要用lxrun的.这都是老黄历,不要采信.<br>前面提了一句,这个所谓安装其实只是注册.因而卸载的时候只要解除注册就可以.解除注册还是用刚才提到的wslconfig<br>因而卸载过程为:在命令行输入<strong>“wslconfig /u 发行版名”</strong> ,解除注册.然后删掉相应的文件夹即可.</p>
+<h2 id="windows10-的linux子系统（windows-subsystem-for-linux-WSL-文件位置"><a href="#windows10-的linux子系统（windows-subsystem-for-linux-WSL-文件位置" class="headerlink" title="windows10 的linux子系统（windows subsystem for linux)WSL 文件位置"></a>windows10 的linux子系统（windows subsystem for linux)WSL 文件位置</h2><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="function">C:\<span class="title">Users</span>\<span class="title">hanaxilo</span>\<span class="title">AppData</span>\<span class="title">Local</span>\<span class="title">Packages</span>\<span class="title">CanonicalGroupLimited.Ubuntu18</span>.04<span class="title">onWindows_79rhkp1fndgsc</span>\</span></span></pre></td></tr></table></figure>
+<h1 id="附-wslconfig的所有命令"><a href="#附-wslconfig的所有命令" class="headerlink" title="附:wslconfig的所有命令:"></a>附:wslconfig的所有命令:</h1><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="function">C:\<span class="title">Users</span>\<span class="title">hanaxilo</span>&gt;<span class="title">wslconfig</span> ?</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="function">对 <span class="title">Windows</span> 上的 <span class="title">Linux</span> 子系统进行操作管理</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"><span class="function"></span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"><span class="function">用途：</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line"><span class="function">    /<span class="title">l</span>, /<span class="title">list</span> [/<span class="title">all</span>]</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"><span class="function">        列出已注册的分发版。</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line"><span class="function">        /<span class="title">all</span> - 有选择地列出所有分发版，包括</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line"><span class="function">               当前正在安装或卸载的分发版。</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line"><span class="function"></span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line"><span class="function">    /<span class="title">s</span>, /<span class="title">setdefault</span> &lt;<span class="title">DistributionName</span>&gt;</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line"><span class="function">        将该分发版设为默认。</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line"><span class="function"></span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line"><span class="function">    /<span class="title">t</span>, /<span class="title">terminate</span> &lt;<span class="title">DistributionName</span>&gt;</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line"><span class="function">        终止分发。</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line"><span class="function"></span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line"><span class="function">    /<span class="title">u</span>, /<span class="title">unregister</span> &lt;<span class="title">DistributionName</span>&gt;</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line"><span class="function">        取消分发版注册。</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line"><span class="function"></span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line"><span class="function">    /<span class="title">upgrade</span> &lt;<span class="title">DistributionName</span>&gt;</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line"><span class="function">        将分发版升级至 <span class="title">WslFs</span> 文件系统格式。</span></span></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Windows10/" rel="tag"># Windows10</a>
+              <a href="/tags/WSL/" rel="tag"># WSL</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20191203.html" rel="prev" title="No matching version found for js-sequence-diagrams@^1000000.0.6">
+      <i class="fa fa-chevron-left"></i> No matching version found for js-sequence-diagrams@^1000000.0.6
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20191205.html" rel="next" title="Windows 10 bat脚本设置环境变量">
+      Windows 10 bat脚本设置环境变量 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Windows-10-企业版-LTSC安装-WSL"><span class="nav-number">1.</span> <span class="nav-text">Windows 10 企业版 LTSC安装 WSL</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#手动下载适用于Linux的Windows子系统发行版安装包"><span class="nav-number">2.</span> <span class="nav-text">手动下载适用于Linux的Windows子系统发行版安装包</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#安装发行版"><span class="nav-number">3.</span> <span class="nav-text">安装发行版</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#解压后直接安装-推荐"><span class="nav-number">3.1.</span> <span class="nav-text">解压后直接安装(推荐)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#命令安装"><span class="nav-number">3.2.</span> <span class="nav-text">命令安装</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#初始化发行版"><span class="nav-number">4.</span> <span class="nav-text">初始化发行版</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#设置root密码"><span class="nav-number">5.</span> <span class="nav-text">设置root密码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#默认使用root用户登录"><span class="nav-number">6.</span> <span class="nav-text">默认使用root用户登录</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Windows-10-子系统Linux重启-不重启Win10"><span class="nav-number">7.</span> <span class="nav-text">Windows 10 子系统Linux重启(不重启Win10)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用"><span class="nav-number">8.</span> <span class="nav-text">使用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#win10内置Ubuntu-Linux换阿里源"><span class="nav-number">9.</span> <span class="nav-text">win10内置Ubuntu/Linux换阿里源</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#先用lsb-release-a查看自己的Ubuntu-Linux系统的版本"><span class="nav-number">9.1.</span> <span class="nav-text">先用lsb_release -a查看自己的Ubuntu/Linux系统的版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#备份内置源"><span class="nav-number">9.2.</span> <span class="nav-text">备份内置源</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#替换阿里源"><span class="nav-number">9.3.</span> <span class="nav-text">替换阿里源</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#更新和升级分发版的包"><span class="nav-number">10.</span> <span class="nav-text">更新和升级分发版的包</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#卸载"><span class="nav-number">11.</span> <span class="nav-text">卸载</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#windows10-的linux子系统（windows-subsystem-for-linux-WSL-文件位置"><span class="nav-number">11.1.</span> <span class="nav-text">windows10 的linux子系统（windows subsystem for linux)WSL 文件位置</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#附-wslconfig的所有命令"><span class="nav-number">12.</span> <span class="nav-text">附:wslconfig的所有命令:</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="mContext"
+      src="/images/default_avatar.jpg">
+  <p class="site-author-name" itemprop="name">mContext</p>
+  <div class="site-description" itemprop="description">Enlightened Shenzhen</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">23</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/mContext" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;mContext" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:h@yuxihan.com" title="E-Mail → mailto:h@yuxihan.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <!--
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备19060123号 </a><a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=44030702002723" rel="noopener" target="_blank">粤公网安备 44030702002723号 </a>
+  </div>
+-->
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <!-- <i class="fa fa-user"></i> -->
+	<i class="fa fa-heart"></i>
+  </span>  
+  <span class="author" itemprop="copyrightHolder">mContext</span>
+  <span>
+	<a target="_blank" href="https://www.upyun.com/?utm_source=lianmeng&utm_medium=referral">
+	<img src="https://upyun.yuxihan.com/yunpaiyun.png" style="display:inline-block;text-decoration:none;width: 50px;margin-bottom:-8px;"></a>
+  </span>
+</div>
+
+<!-- 在网页底部添加网站运行时间 -->
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("05/20/2014 00:00:00");//此处修改你的建站时间或者网站上线时间
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "网站已运行 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+    }
+setInterval("createtime()",250);
+</script>
+  <div class="beian">
+    <a href="http://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备19060123号</a>
+
+    <span class="post-meta-divider">|</span>
+  
+    <img src="/images/beian_icon.png" style="display:inline-block;text-decoration:none;height:13px;" />
+   
+    <a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=44030702002723" rel="noopener" target="_blank">粤公网安备 44030702002723号</a>
+
+  </div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

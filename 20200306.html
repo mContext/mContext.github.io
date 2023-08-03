@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://yuxihan.com').hostname,
+    root: '/',
+    scheme: 'Mist',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="转发效果请求 http:&#x2F;&#x2F;www.yourdomain.com&#x2F;转发到 http:&#x2F;&#x2F;www.yourdomain.com:8080&#x2F;">
+<meta name="keywords" content="CentOS,Nginx">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CentOS安装Nginx并配置转发">
+<meta property="og:url" content="https:&#x2F;&#x2F;yuxihan.com&#x2F;20200306.html">
+<meta property="og:site_name" content="Write the code">
+<meta property="og:description" content="转发效果请求 http:&#x2F;&#x2F;www.yourdomain.com&#x2F;转发到 http:&#x2F;&#x2F;www.yourdomain.com:8080&#x2F;">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-09-15T15:20:01.000Z">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://yuxihan.com/20200306.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>CentOS安装Nginx并配置转发 | Write the code</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?e8fc3c7012308a4ca7e8bd1a27c6ce86";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Write the code</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://yuxihan.com/20200306.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/default_avatar.jpg">
+      <meta itemprop="name" content="mContext">
+      <meta itemprop="description" content="Enlightened Shenzhen">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Write the code">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CentOS安装Nginx并配置转发
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-03-06 11:50:00" itemprop="dateCreated datePublished" datetime="2020-03-06T11:50:00+08:00">2020-03-06</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-09-15 23:20:01" itemprop="dateModified" datetime="2020-09-15T23:20:01+08:00">2020-09-15</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="转发效果"><a href="#转发效果" class="headerlink" title="转发效果"></a>转发效果</h2><p>请求 <a href="http://www.yourdomain.com/" target="_blank" rel="noopener">http://www.yourdomain.com/</a><br>转发到 <a href="http://www.yourdomain.com:8080/" target="_blank" rel="noopener">http://www.yourdomain.com:8080/</a></p>
+<a id="more"></a>
+
+<h2 id="安装Nginx"><a href="#安装Nginx" class="headerlink" title="安装Nginx"></a>安装Nginx</h2><h3 id="一、配置-EPEL源"><a href="#一、配置-EPEL源" class="headerlink" title="一、配置 EPEL源"></a>一、配置 EPEL源</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">sudo yum <span class="keyword">install</span> -y epel-<span class="keyword">release</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">sudo yum -y <span class="keyword">update</span></span></pre></td></tr></table></figure>
+<h3 id="二、安装Nginx"><a href="#二、安装Nginx" class="headerlink" title="二、安装Nginx"></a>二、安装Nginx</h3><figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">sudo yum <span class="keyword">install</span> -y nginx</span></pre></td></tr></table></figure>
+<p>安装成功后，默认的网站目录为： /usr/share/nginx/html</p>
+<p>默认的配置文件为：/etc/nginx/nginx.conf</p>
+<p>自定义配置文件目录为: /etc/nginx/conf.d/</p>
+<h3 id="三、开启端口80和443"><a href="#三、开启端口80和443" class="headerlink" title="三、开启端口80和443"></a>三、开启端口80和443</h3><p>如果你的服务器打开了防火墙，你需要运行下面的命令，打开80和443端口。</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">sudo firewall-cmd --permanent <span class="attribute">--zone</span>=public <span class="attribute">--add-service</span>=http</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">sudo firewall-cmd --permanent <span class="attribute">--zone</span>=public <span class="attribute">--add-service</span>=https</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">sudo firewall-cmd --reload</span></pre></td></tr></table></figure>
+<h2 id="找到Nginx配置文件"><a href="#找到Nginx配置文件" class="headerlink" title="找到Nginx配置文件"></a>找到Nginx配置文件</h2><figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# nginx -t</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">nginx: the configuration <span class="keyword">file</span> /usr/<span class="keyword">local</span>/nginx/<span class="keyword">conf</span>/nginx.<span class="keyword">conf</span> <span class="keyword">syntax</span> is ok</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">nginx: configuration <span class="keyword">file</span> /usr/<span class="keyword">local</span>/nginx/<span class="keyword">conf</span>/nginx.<span class="keyword">conf</span> <span class="keyword">test</span> is successful</span></pre></td></tr></table></figure>
+<h2 id="修改nginx配置文件"><a href="#修改nginx配置文件" class="headerlink" title="修改nginx配置文件"></a>修改nginx配置文件</h2><figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">...</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">server&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">       ...</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">       <span class="comment">#...默认转发至8080端口 Satrt </span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">        <span class="keyword">location</span> <span class="title">/ &#123;</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"><span class="title">                 proxy_pass</span> http://localhost:<span class="number">8080</span>;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">       <span class="comment">#...默认转发至8080端口 End</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">        <span class="keyword">location</span> <span class="title">/nginx_status</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">        &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">            stub_status on;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">            access_log   off;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">        ...</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">     &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">...</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<h2 id="验证配置文件是否正确"><a href="#验证配置文件是否正确" class="headerlink" title="验证配置文件是否正确"></a>验证配置文件是否正确</h2><figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="attribute">nginx -t</span></span></pre></td></tr></table></figure>
+
+<h2 id="使配置文件生效"><a href="#使配置文件生效" class="headerlink" title="使配置文件生效"></a>使配置文件生效</h2><figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="attribute">nginx -s reload</span></span></pre></td></tr></table></figure>
+
+<h2 id="Nginx操作命令"><a href="#Nginx操作命令" class="headerlink" title="Nginx操作命令"></a>Nginx操作命令</h2><p>1.启动 Nginx</p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">systemctl <span class="literal">start</span> nginx</span></pre></td></tr></table></figure>
+<p>2.停止Nginx</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">systemctl <span class="built_in">stop</span> nginx</span></pre></td></tr></table></figure>
+<p>3.重启Nginx</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="attribute">systemctl restart nginx</span></span></pre></td></tr></table></figure>
+<p>4.查看Nginx状态</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="attribute">systemctl status nginx</span></span></pre></td></tr></table></figure>
+<p>5.启用开机启动Nginx</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">systemctl <span class="builtin-name">enable</span> nginx</span></pre></td></tr></table></figure>
+<p>6.禁用开机启动Nginx</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">systemctl <span class="builtin-name">disable</span> nginx</span></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/CentOS/" rel="tag"># CentOS</a>
+              <a href="/tags/Nginx/" rel="tag"># Nginx</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20200301.html" rel="prev" title="CentOS下重置MySql密码">
+      <i class="fa fa-chevron-left"></i> CentOS下重置MySql密码
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20200310.html" rel="next" title="CentOS下jar包配置为系统服务">
+      CentOS下jar包配置为系统服务 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#转发效果"><span class="nav-number">1.</span> <span class="nav-text">转发效果</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装Nginx"><span class="nav-number">2.</span> <span class="nav-text">安装Nginx</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#一、配置-EPEL源"><span class="nav-number">2.1.</span> <span class="nav-text">一、配置 EPEL源</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二、安装Nginx"><span class="nav-number">2.2.</span> <span class="nav-text">二、安装Nginx</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三、开启端口80和443"><span class="nav-number">2.3.</span> <span class="nav-text">三、开启端口80和443</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#找到Nginx配置文件"><span class="nav-number">3.</span> <span class="nav-text">找到Nginx配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修改nginx配置文件"><span class="nav-number">4.</span> <span class="nav-text">修改nginx配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#验证配置文件是否正确"><span class="nav-number">5.</span> <span class="nav-text">验证配置文件是否正确</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使配置文件生效"><span class="nav-number">6.</span> <span class="nav-text">使配置文件生效</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Nginx操作命令"><span class="nav-number">7.</span> <span class="nav-text">Nginx操作命令</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="mContext"
+      src="/images/default_avatar.jpg">
+  <p class="site-author-name" itemprop="name">mContext</p>
+  <div class="site-description" itemprop="description">Enlightened Shenzhen</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">23</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/mContext" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;mContext" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:h@yuxihan.com" title="E-Mail → mailto:h@yuxihan.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <!--
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备19060123号 </a><a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=44030702002723" rel="noopener" target="_blank">粤公网安备 44030702002723号 </a>
+  </div>
+-->
+<div class="copyright">
+  
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <!-- <i class="fa fa-user"></i> -->
+	<i class="fa fa-heart"></i>
+  </span>  
+  <span class="author" itemprop="copyrightHolder">mContext</span>
+  <span>
+	<a target="_blank" href="https://www.upyun.com/?utm_source=lianmeng&utm_medium=referral">
+	<img src="https://upyun.yuxihan.com/yunpaiyun.png" style="display:inline-block;text-decoration:none;width: 50px;margin-bottom:-8px;"></a>
+  </span>
+</div>
+
+<!-- 在网页底部添加网站运行时间 -->
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("05/20/2014 00:00:00");//此处修改你的建站时间或者网站上线时间
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "网站已运行 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+    }
+setInterval("createtime()",250);
+</script>
+  <div class="beian">
+    <a href="http://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备19060123号</a>
+
+    <span class="post-meta-divider">|</span>
+  
+    <img src="/images/beian_icon.png" style="display:inline-block;text-decoration:none;height:13px;" />
+   
+    <a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=44030702002723" rel="noopener" target="_blank">粤公网安备 44030702002723号</a>
+
+  </div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
